@@ -57,10 +57,10 @@ services:
       - internal
       - caddy
 
-  labels:
-    caddy: artistapi.marcohuber-web.site 
-    caddy.reverse_proxy: "{{upstreams 8080}}"
-    caddy.request_body: "max_size 30MB"
+    labels:
+      caddy: artistapi.marcohuber-web.site 
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.request_body: "max_size 30MB"
 
 
 volumes:
