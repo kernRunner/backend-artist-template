@@ -1,0 +1,47 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build artifacts
+bin/
+vendor/
+dist/
+*.log
+
+# IDE/editor config
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Dependency directories
+node_modules/
+coverage/
+testdata/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env & secrets
+.env
+.env.*
+*.key
+*.pem
+*.crt
+server
+
+# Logs
+logs/
+*.log
+
+# PostgreSQL dumps
+*.sql
+*.dump

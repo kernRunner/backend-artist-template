@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in portainer env or .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set in portainer env or .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      # App
+      PORT: "8080"
+      APP_URL: ${APP_URL:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+
+      # Auth / Security
+      JWT_SECRET: ${JWT_SECRET:?set in portainer env or .env}
+
+      # Storage
+      UPLOAD_DIR: /uploads
+
+      # Database (IMPORTANT: host is "db" inside docker)
+      DB_URL: ${DB_URL:-postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable}
+
+      # Stripe
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PORTFOLIO_PRODUCT_ID: ${STRIPE_PORTFOLIO_PRODUCT_ID:-}
+
+      # SMTP
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL:-}
+      GOOGLE_FRONTEND_REDIRECT: ${GOOGLE_FRONTEND_REDIRECT:-}
+
+    volumes:
+      - /opt/artisttemplates/uploads:/uploads
+
+    networks:
+      - internal
+      - caddy
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    driver: bridge
+  caddy:
+    external: true

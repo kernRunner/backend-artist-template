@@ -1,0 +1,108 @@
+DROP TABLE IF EXISTS artwork_i18ns, artworks, series_i18ns, series, images CASCADE;
+
+
+
+INSERT INTO templates (slug, name, active)
+VALUES ('georg-fieger', 'Georg Fieger (Full)', true);
+
+
+
+
+
+
+
+
+WITH tmpl AS (
+  SELECT id FROM templates WHERE slug = 'georg-fieger'
+)
+INSERT INTO site_pages (owner_type, user_id, template_id, slug, lang, status)
+SELECT 'system', NULL, tmpl.id, p.slug, p.lang, 'published'
+FROM tmpl,
+     (VALUES
+        ('global','de'),
+        ('global','en'),
+        ('home','de'),
+        ('home','en'),
+        ('kontakt','de'),
+        ('kontakt','en'),
+        ('vita','de'),
+        ('vita','en'),
+        ('aktuelles','de'),
+        ('aktuelles','en'),
+        ('arbeiten','de'),
+        ('arbeiten','en'),
+        ('impressum','de'),
+        ('impressum','en')
+     ) AS p(slug, lang);
+
+
+
+
+
+
+
+WITH pages AS (
+  SELECT sp.id, sp.slug, sp.lang
+  FROM site_pages sp
+  JOIN templates t ON t.id = sp.template_id
+  WHERE t.slug = 'georg-fieger' AND sp.owner_type = 'system'
+)
+INSERT INTO site_page_blocks (page_id, sort_index, type, props)
+SELECT
+  p.id,
+  b.sort_index,
+  b.type,
+  b.props::jsonb
+FROM pages p
+JOIN (
+  VALUES
+    -- =========================
+    -- GLOBAL (site + artist)
+    -- =========================
+    ('global','de',0,'siteSettings','{
+      "defaultOgImage":"/social-preview1.jpg",
+      "languages":["de","en"]
+    }'),
+    ('global','en',0,'siteSettings','{
+      "defaultOgImage":"/social-preview1.jpg",
+      "languages":["de","en"]
+    }'),
+    ('global','de',1,'artist','{
+      "name":"Georg Ludwig Fieger Publish",
+      "email":"info@example.com",
+      "website":"https://www.example.com",
+      "address":{"street":"Street 1","zip":"12345","city":"City","country":"Germany"}
+    }'),
+    ('global','en',1,'artist','{
+      "name":"Georg Ludwig Fieger Publish",
+      "email":"info@example.com",
+      "website":"https://www.example.com",
+      "address":{"street":"Street 1","zip":"12345","city":"City","country":"Germany"}
+    }'),
+
+    -- =========================
+    -- HOME
+    -- =========================
+    ('home','de',0,'pageMeta','{"pageLabel":"Startseite","artistName":"Georg Ludwig Fieger"}'),
+    ('home','de',1,'hero','{
+      "image":{"webp":"/images/GeorgFieger_BlauPause_BlaueStundeStoffBruch_0168.webp","avif":"/images/GeorgFieger_BlauPause_BlaueStundeStoffBruch_0168.avif"},
+      "alt":"Hintergrund"
+    }'),
+    ('home','de',2,'seo','{
+      "title":"Georg Fieger · Zeitgenössische Licht- & Schattenkunst",
+      "description":"Zeitgenössische Malerei und atmosphärische Fotografie von Georg Fieger. Erforschung von Licht, Schatten, Textur und Übergängen in urbanen Landschaften und natürlichen Räumen.",
+      "ogImage":"/social-preview.jpg"
+    }'),
+
+    ('home','en',0,'pageMeta','{"pageLabel":"","artistName":""}'),
+    ('home','en',1,'hero','{
+      "image":{"webp":"/images/GeorgFieger_BlauPause_BlaueStundeStoffBruch_0168.webp","avif":"/images/GeorgFieger_BlauPause_BlaueStundeStoffBruch_0168.avif"},
+      "alt":"Background"
+    }'),
+    ('home','en',2,'seo','{
+      "title":"Georg Fieger · Contemporary Light & Shadow Art",
+      "description":"Contemporary paintings and atmospheric photography by Georg Fieger. Exploring light, shadow, texture, and transitions across urban landscapes and natural spaces.",
+      "ogImage":"/social-preview.jpg"
+    }')
+) AS b(slug, lang, sort_index, type, props)
+ON p.slug = b.slug AND p.lang = b.lang;
